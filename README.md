@@ -2,22 +2,30 @@
 
 ## Install requirements
 ```
+conda create -n aerial_robotics python=3.10
+conda activate aerial_robotics
+
 sudo apt-get install \
-ros-melodic-libmavconn \
-ros-melodic-message-to-tf \
-ros-melodic-mavros \
-ros-melodic-mavros-msgs \
-ros-melodic-apriltag \
-ros-melodic-apriltag-ros \
+ros-noetic-libmavconn \
+ros-noetic-message-to-tf \
+ros-noetic-mavros \
+ros-noetic-mavros-msgs \
+ros-noetic-apriltag \
+ros-noetic-apriltag-ros \
 libgstreamer-plugins-base1.0-dev \
 python3-numpy \
 python3-jinja2 \
-python-pexpect \
-python-pip
+python-pexpect
 
+# NOTE: the following line throws an error for me, you can skip it.
+sudo apt-get install python-pip
+
+# Install python packages
 pip install \
 mavproxy==1.8.49 \
-monotonic
+monotonic \
+empy \
+catkin_pkg
 
 # [MAVProxy Version: Verify you have mavproxy version 1.8.49 installed]
 pip show mavproxy
@@ -41,8 +49,8 @@ catkin build
 cd $HOME/aerial_robotics_ws/src
 git clone --recursive -b master https://github.com/robowork/aerial_robotics
 
-cd $HOME/aerial_robotics_ws && git clone --recursive https://github.com/ArduPilot/ardupilot && cd ardupilot
-git checkout Plane-4.2
+cd $HOME/aerial_robotics_ws && git clone --recursive git@github.com:Pratiquea/ardupilot.git && cd ardupilot
+git checkout remotes/origin/plane-4.2/feature/thrust_attitude_support
 ./Tools/gittools/submodule-sync.sh
 ./Tools/environment_install/install-prereqs-ubuntu.sh -y
 
@@ -69,8 +77,8 @@ patch -p0 < ../src/aerial_robotics/deps/ArduPilotPlugin_cc.patch
 cd build && make -j 12 && sudo make install
 
 cd $HOME/aerial_robotics_ws && git clone --recursive https://github.com/PX4/sitl_gazebo.git && cd sitl_gazebo
-git checkout 9343aaf4e275db48fce02dd25c5bd8273c2d583a
 mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release ..
+pip install Jinja2 numpy
 make -j 12 && sudo make install
 
 ### NOTES ###
@@ -80,9 +88,9 @@ sudo cp $HOME/aerial_robotics_ws/sitl_gazebo/build/libphysics_msgs.so /usr/lib/x
 sudo mv /usr/lib/x86_64-linux-gnu/mavlink_sitl_gazebo/plugins/libLiftDragPlugin.so /usr/lib/x86_64-linux-gnu/mavlink_sitl_gazebo/plugins/libLiftDragPlugin.so.PX4_SITL_VERSION
 
 # Add the following lines at the end of your ~/.bashrc file
-export GAZEBO_MODEL_PATH=/usr/share/gazebo-9/models:${GAZEBO_MODEL_PATH}
-export GAZEBO_RESOURCE_PATH=/usr/share/gazebo-9:${GAZEBO_RESOURCE_PATH}
-export GAZEBO_PLUGIN_PATH=/usr/lib/x86_64-linux-gnu/gazebo-9/plugins:${GAZEBO_PLUGIN_PATH}
+export GAZEBO_MODEL_PATH=/usr/share/gazebo-11/models:${GAZEBO_MODEL_PATH}
+export GAZEBO_RESOURCE_PATH=/usr/share/gazebo-11:${GAZEBO_RESOURCE_PATH}
+export GAZEBO_PLUGIN_PATH=/usr/lib/x86_64-linux-gnu/gazebo-11/plugins:${GAZEBO_PLUGIN_PATH}
 export GAZEBO_MODEL_PATH=/usr/share/mavlink_sitl_gazebo/models:${GAZEBO_MODEL_PATH}
 export GAZEBO_PLUGIN_PATH=/usr/lib/x86_64-linux-gnu/mavlink_sitl_gazebo/plugins:${GAZEBO_PLUGIN_PATH}
 export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${GAZEBO_PLUGIN_PATH}
@@ -91,7 +99,13 @@ export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${GAZEBO_PLUGIN_PATH}
 cp -r $HOME/aerial_robotics_ws/src/aerial_robotics/robowork_minihawk_gazebo/models/* $HOME/.gazebo/models/
 
 cd $HOME/aerial_robotics_ws
+export PYTHONPATH="$PYTHONPATH:/usr/lib/python3/dist-packages"
 catkin build
+
+# Install additional python packages
+pip install pexpect \
+rospkg \
+defusedxml
 ```
 
 ## Simulation
